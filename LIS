@@ -1,0 +1,144 @@
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+class LIS
+{
+
+
+    public static void main(String args[])
+    {
+        System.out.println( longestIncreasingSubsequences(new int[]{7,8,9,1,2,3}) );//passing array to the function
+
+    }
+
+
+
+
+
+//This function returns all possible Longest-Increasing-Subsequences(LIS) in the form of list of Strings
+    static List<String>  longestIncreasingSubsequences(int nums[])
+    {
+        int len = nums.length;
+
+        if(len == 0)            // If there are no elements in the array then there cannot be any Subsequences.
+            return null;        // Hence our List of Strings is going to be empty
+
+
+
+
+                                                         // predecessor[i] is going to contain the List of indices in nums
+                                                         //that could potentially form Longest-Increasing-Subsequences(LIS) with ith element of  nums
+
+        List<Integer> predecessors[] = new List[len];    /*    index :  0   1   2
+                                                         Eg: if nums : {5 , 1 , 6}   then predecessors[2] = [0 , 1] because both 5 and 1 can form LIS with 6
+                                                                                     hence the indices of 5 and 1 are stored in predecessors[2]
+                                                                                     Likewise
+                                                                                     predecessors[0]  =  null
+                                                                                     predecessors[1]  =  null
+                                                                                     because 5 and 1 don't have any predecessors       */
+
+
+
+        List<Integer> IndicesOfMaxLen = new LinkedList<>();     // this list will store the indices of all the numbers in the array that will  form the
+                                                                // end the LIS with length = maxLen      (remember there can be multiple Subsequences with length =  maxLen )
+                                                                 /*    index :  0    1   2   3   4
+                                                                  Eg: if nums: {12 , 8 , 9 , 5 , 7}    then  IndicesOfMaxLen = [2, 4]
+                                                                                                       because LISs are "8 , 9" and  "5 , 7"  (both of length 2 and maxLen is also 2)
+                                                                                                       9 and 7 are at the indices  2 and 4 respectively
+                                                                                                       so   IndicesOfMaxLen = [2, 4]    */
+
+
+
+
+
+        int maxLen = utilLIS(nums , predecessors , IndicesOfMaxLen);     // utilLIS() is responsible for filling " predecessors[] "  and    " IndicesOfMaxLen "
+                                                                         // utilLis also returns maxLen
+
+
+
+    //once we have "predecessors[] " and   "IndicesOfMaxLen" filled  by above function
+    //we can proceed to get all possible Longest-Increasing-Subsequences(LIS) in the form of list of Strings
+        return util_longestIncreasingSubsequences(nums , predecessors , IndicesOfMaxLen);
+
+    }
+
+
+
+    static int utilLIS(int nums[] , List<Integer> predecessors[] , List<Integer> IndicesOfMaxLen)
+    {
+        int len = nums.length;
+        int maxLen = 1;             //default maxLen =  1
+        int maxAt[] = new int[len];
+        Arrays.fill(maxAt , 1);
+
+        for(int i = 0;i<len;i++)
+        {
+
+         for(int j = 0;j<i;j++)
+         {
+             if(nums[j] <= nums[i])
+             {
+                maxAt[i] = Math.max( maxAt[j]+1 , maxAt[i]);                //update maxAt[i]
+                maxLen = Math.max(maxLen , maxAt[i]);                       //update maxLen
+             }
+
+         }//j end
+
+
+            if(maxAt[i] != 1)
+            {
+                List<Integer> temp = new LinkedList<>();
+
+                for (int j = 0; j < i ; j++)
+                    if ((maxAt[j] == maxAt[i] - 1) && (nums[j] <= nums[i]))
+                        temp.add(j);
+
+                predecessors[i] = temp;
+            }
+
+        } //i end
+
+
+
+        for(int j = 0;j<len;j++)
+        {
+            if(maxAt[j] == maxLen)
+                IndicesOfMaxLen.add(j);
+        }
+
+        return maxLen;
+    }
+
+
+
+
+   static  List<String> util_longestIncreasingSubsequences(int nums[] , List<Integer> predecessors[] , List<Integer> listOfCurr)
+    {
+        List<String> res =  new LinkedList<>();
+
+        if(listOfCurr  ==  null)
+        {
+            res.add("");
+            return res;
+        }
+
+
+
+
+        for(int i =0;i<listOfCurr.size();i++)
+        {
+            List<String> temp = util_longestIncreasingSubsequences(nums, predecessors , predecessors[listOfCurr.get(i)] );
+            for(int j =0; j<temp.size();j++)
+            {
+                res.add(temp.get(j)+ nums[listOfCurr.get(i)]+" ");
+
+            }
+
+        }
+        return res;
+
+    }// END of util_longestIncreasingSubsequences
+
+
+}// END of class
